@@ -1,6 +1,7 @@
 MANIFEST.in
-README.rst
+README.md
 hdf2mic
+hdf2mic.py
 setup.py
 hdf2mic/__init__.py
 hdf2mic/arg_mapping.py

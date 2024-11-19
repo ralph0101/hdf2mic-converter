@@ -14,9 +14,6 @@ References
 import json
 from hdf2mic.data import Data
 
-
-
-
 class ArgMapper(object):
     r"""ArgMapper description
 
@@ -367,9 +364,12 @@ class ArgMapper(object):
         # remove unwanted kv pairs
         if "JSON_TEMPLATE" in attr_dict:
             attr_dict.pop("JSON_TEMPLATE")
+        toDel = []
         for k in attr_dict.keys():
             if k.startswith("_"):
-                del attr_dict[k]
+                toDel.append(k)
+        for k in toDel:
+            del attr_dict[k]
 
         # get items (list of tuples key (str): value (obj))
         attrs_list = vars(self).items()

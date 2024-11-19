@@ -382,62 +382,62 @@ class Reader(object):
             dset = self.dset(celldata_path)  # h5py.Dataset
             try:
                 numpy_type = self.data.numpy_type_for_vtk_type(celldata_type)
-                with dset.astype(numpy_type):
-                    celldata_array = dset[...]  # np.ndarray
-                    if len(celldata_array.shape) == 1:
-                        celldata_array = celldata_array.reshape((-1, 1))
-                        
-                    rotArray = np.ndarray(shape=celldata_array.shape, dtype=numpy_type)
-                    if(self.settings.rotate and celldata_name == "euler"):
-                        x,y,z = celldata_array.shape # z immer 3!!!
-                        for xx in range (x):
-                            for yy in range (y):
-                                try:
-                                    ttt = rotate([celldata_array[xx][yy][0],celldata_array[xx][yy][1],celldata_array[xx][yy][2]],True)
-                                    rotArray[xx,yy,0]= ttt[0]
-                                    rotArray[xx,yy,1]= ttt[1]
-                                    rotArray[xx,yy,2]= ttt[2]
-#                                    print (celldata_array[xx][yy])
-                                except ValueError as err:
-                                    print("celldata_scalar[x][y][z] = {}".format(celldata_array[xx][yy]))
-                                    raise err
-                        celldata_array = rotArray
-                        
+                celldata_array = dset.astype(numpy_type)[...]  # np.ndarray
 
-                    # YB TODO: this section has been skipped; bugs to be fixed!!! 
-                    if (self.settings.rotate and self.dim == 30 and celldata_name == "euler"):
-                        # RA: Hack to reorder array elements, necessary for rotated axis system
-                        # YW TODO: elegantere Moeglichkeit? Warum ist 'array' andersherum angeordnet (z,y,x) ?
-                        # JW TODO: this swap method is really inefficient. Try h5py method on dset (slicing?) or else numpy.
-                        (dimZ, dimY, dimX, t) = celldata_array.shape
-                        rotArray = None
+                if len(celldata_array.shape) == 1:
+                    celldata_array = celldata_array.reshape((-1, 1))
+                    
+                rotArray = np.ndarray(shape=celldata_array.shape, dtype=numpy_type)
+                if(self.settings.rotate and celldata_name == "euler"):
+                    x,y,z = celldata_array.shape # z immer 3!!!
+                    for xx in range (x):
+                        for yy in range (y):
+                            try:
+                                ttt = rotate([celldata_array[xx][yy][0],celldata_array[xx][yy][1],celldata_array[xx][yy][2]],True)
+                                rotArray[xx,yy,0]= ttt[0]
+                                rotArray[xx,yy,1]= ttt[1]
+                                rotArray[xx,yy,2]= ttt[2]
+#                                    print (celldata_array[xx][yy])
+                            except ValueError as err:
+                                print("celldata_scalar[x][y][z] = {}".format(celldata_array[xx][yy]))
+                                raise err
+                    celldata_array = rotArray
+                    
+
+                # YB TODO: this section has been skipped; bugs to be fixed!!! 
+                if (self.settings.rotate and self.dim == 30 and celldata_name == "euler"):
+                    # RA: Hack to reorder array elements, necessary for rotated axis system
+                    # YW TODO: elegantere Moeglichkeit? Warum ist 'array' andersherum angeordnet (z,y,x) ?
+                    # JW TODO: this swap method is really inefficient. Try h5py method on dset (slicing?) or else numpy.
+                    (dimZ, dimY, dimX, t) = celldata_array.shape
+                    rotArray = None
 #                        if (t == 1):
 #                            rotArray = np.ndarray(shape=(dimY, dimZ, dimX), dtype=numpy_type)
 #                        elif (t > 1):
 #                            rotArray = np.ndarray(shape=(dimY, dimZ, dimX, t), dtype=numpy_type)
-                        rotArray = np.ndarray(shape=(dimY, dimZ, dimX, t), dtype=numpy_type)
-                        for z in range(dimZ):
-                            for y in range(dimY):
-                                for x in range(dimX):
-                                    try:
-                                        cellValue = celldata_array[z][y][x]
+                    rotArray = np.ndarray(shape=(dimY, dimZ, dimX, t), dtype=numpy_type)
+                    for z in range(dimZ):
+                        for y in range(dimY):
+                            for x in range(dimX):
+                                try:
+                                    cellValue = celldata_array[z][y][x]
 
-                                        # check if this cellData has to rotated locally as well
-                                        # (e.g. cell-wise eulerAngles)
-                                        cellDataToRotate = self.settings.rotateCellDataValues
-                                        if cellDataToRotate is not None and cellDataToRotate:  # non-empty list
-                                            # if int, compare to loop index. if str, compare to dataName
-                                            if (any((el == i or el == celldata_name) for el in cellDataToRotate)):
-                                                cellValue = rotate(cellValue, True)
-                                                # JW: is this correct???
+                                    # check if this cellData has to rotated locally as well
+                                    # (e.g. cell-wise eulerAngles)
+                                    cellDataToRotate = self.settings.rotateCellDataValues
+                                    if cellDataToRotate is not None and cellDataToRotate:  # non-empty list
+                                        # if int, compare to loop index. if str, compare to dataName
+                                        if (any((el == i or el == celldata_name) for el in cellDataToRotate)):
+                                            cellValue = rotate(cellValue, True)
+                                            # JW: is this correct???
 
-                                        rotArray[dimY - y - 1][z][x] = cellValue
-                                    except ValueError as err:
-                                        print("celldata_scalar[z][y][x] = {}".format(celldata_array[z][y][x]))
-                                        raise err
-                        celldata_array = rotArray
-                        
-                    celldata_arrays.append(celldata_array)
+                                    rotArray[dimY - y - 1][z][x] = cellValue
+                                except ValueError as err:
+                                    print("celldata_scalar[z][y][x] = {}".format(celldata_array[z][y][x]))
+                                    raise err
+                    celldata_array = rotArray
+                    
+                celldata_arrays.append(celldata_array)
 
             except (KeyError, TypeError) as error:
                 print("ERROR: Unknown VTK dataType {} for cellData with path {}. See JSON template for accepted types."
@@ -450,7 +450,8 @@ class Reader(object):
                      self._celldata_dataTypes,
                      self._celldata_datasetAttributeTypes)
         # sort in-place by DatasetAttributeType
-        tuples.sort(key=lambda tup: self.data.VTK_DATASET_ATTRIBUTE_TYPE_ORDER[tup[3]])
+        # RA: does not work with python 3.11
+        # sorted(tuples, key=lambda tup: self.data.VTK_DATASET_ATTRIBUTE_TYPE_ORDER[tup[3]])
 
         # append fieldArray list
         if count_field_arrays:
@@ -464,6 +465,7 @@ class Reader(object):
                 tuples[i] = tuples[i] + self._celldata_fieldArrays[i - count_non_field_arrays]
 
         # append tags
+        tuples = list(tuples)
         for i in range(len(tuples)):
             tuples[i] = tuples[i] + (self._celldata_tags[i],)
 
@@ -494,7 +496,7 @@ class Reader(object):
         dimensions_vtkCell = self.dset(self.group_dimensions)[...]
         dimensions_vtkPoint = np.array([d + 1 for d in dimensions_vtkCell])
 
-        self.data._celldata_size = np.product(dimensions_vtkCell)
+        self.data._celldata_size = np.prod(dimensions_vtkCell)
 
         if (self.settings.rotate and self.dim == 3):
             # RA: Hack to rotate results: exchange y and z dimensions

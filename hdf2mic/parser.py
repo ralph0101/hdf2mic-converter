@@ -6,7 +6,7 @@ This module contains classes that handle the command-line input of the script hd
 
 import argparse
 import json
-from arg_mapping import *
+from hdf2mic.arg_mapping import *
 
 
 class Parser(object):
@@ -85,10 +85,10 @@ class Parser(object):
         """
         if isinstance(string_container, dict):
             return {self.byteify(key): self.byteify(value)
-                    for key, value in string_container.iteritems()}
+                    for key, value in string_container.items()}
         elif isinstance(string_container, list):
             return [self.byteify(element) for element in string_container]
-        elif isinstance(string_container, unicode):
+        elif isinstance(string_container, str ):
             return string_container.encode('utf-8')
         else:
             return string_container
@@ -142,7 +142,7 @@ class Parser(object):
                 try:
                     template_dict = json.load(json_data)
                     # convert returned unicode dict to str dict
-                    template_dict = self.byteify(template_dict)
+                    #template_dict = self.byteify(template_dict)
                 except ValueError as error:
                     print("ERROR: Failed to parse {} as JSON: incorrect syntax. {}"
                         .format(filepath, self.PARSER_ERR_MSG_PROBABLE_REASONS))

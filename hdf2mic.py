@@ -8,6 +8,9 @@ Notes
 Calling via 'python hdf2mic.py' requires hdf2mic modules folder in the same folder. Follow printed help instructions.
 Alternative: install the whole package to Python env, then call 'hdf2mic' directly. See setup.py.
 
+Change Log:
+26-Nov-2023 RA ported to python 3.11
+
 Developer Notes:
 TODO: rotations in reader.py (search for 'if (self.settings.rotate'): check if conditions for rotation are correct
 Reason: implemented rotation in mic2hdf, had to extend the conditions a bit so that it worked.
@@ -16,6 +19,7 @@ Reason: implemented rotation in mic2hdf, had to extend the conditions a bit so t
         If false, rotMat.py rotate() is not called.
         Not sure if this should be added in the current hdf2mic implementation, or if it's not necessary.
 """
+
 import os
 from hdf2mic.parser import Parser
 from hdf2mic.arg_mapping import ArgMap

@@ -182,8 +182,9 @@ LOOKUP_TABLE default""",
     def _write_array(self, header, dataType, array):
 
         size = array.size
-        divisor = size / self.settings.columns
-        remainder = size % self.settings.columns
+        divisor, remainder = divmod(size,self.settings.columns)
+       # divisor = size / self.settings.columns
+       # remainder = size % self.settings.columns
         divisor_quotient = size - remainder
         bulk = array.flat[:divisor_quotient].reshape(divisor, self.settings.columns)
         tail = array.flat[divisor_quotient:]

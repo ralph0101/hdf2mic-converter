@@ -18,7 +18,7 @@ class Settings(object):
         Prints the settings.
         """
         attrs_list = vars(self).items()
-        attrs_list.sort()
+        sorted(attrs_list)
         print("\n ".join("\t%s: %s" % item for item in attrs_list))
 
 #@deprecated(reason="v0.4 --> v0.5: settings/input/hdf5 changed from application-specific"
